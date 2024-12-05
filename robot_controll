@@ -1,0 +1,128 @@
+<?xml version="1.0"?>
+<robot>
+    <gazebo reference="front_left_wheel_joint">
+        <implicitSpringDamper>true</implicitSpringDamper>
+    </gazebo>
+    
+    <gazebo reference="front_right_wheel_joint">
+        <implicitSpringDamper>true</implicitSpringDamper>
+    </gazebo>
+    
+    <gazebo reference="rear_left_wheel_joint">
+        <implicitSpringDamper>true</implicitSpringDamper>
+    </gazebo>
+    
+    <gazebo reference="rear_right_wheel_joint">
+        <implicitSpringDamper>true</implicitSpringDamper>
+    </gazebo>
+    
+    <gazebo reference="mast_section_1_joint">
+        <implicitSpringDamper>true</implicitSpringDamper>
+    </gazebo>
+    
+    <gazebo reference="mast_section_2_joint">
+        <implicitSpringDamper>true</implicitSpringDamper>
+    </gazebo>
+    
+    <gazebo reference="mast_section_3_joint">
+        <implicitSpringDamper>true</implicitSpringDamper>
+    </gazebo>
+    
+    <gazebo reference="backboard_tilt_joint">
+        <implicitSpringDamper>true</implicitSpringDamper>
+    </gazebo>
+    
+    <gazebo>
+        <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control">
+            <robot_sim_type>gazebo_ros2_control/DefaultSystemPositionOnlyHardware</robot_sim_type>
+            <parameters>$(find my_forklift_robot)/config/controller_config.yaml</parameters>
+        </plugin>
+    </gazebo>
+    
+    <ros2_control name="GazeboSystem" type="system">
+        <hardware>
+            <plugin>gazebo_ros2_control/GazeboSystem</plugin>
+        </hardware>
+
+        <joint name="front_left_wheel_joint">
+            <command_interface name="position">
+                <param name="min">-${pi/2}</param>
+                <param name="max">${pi/2}</param>
+            </command_interface>
+            <state_interface name="position"/>
+            <state_interface name="velocity"/>
+            <state_interface name="effort"/>
+        </joint>
+    
+        <joint name="front_right_wheel_joint">
+            <command_interface name="position">
+                <param name="min">-${pi/2}</param>
+                <param name="max">${pi/2}</param>
+            </command_interface>
+            <state_interface name="position"/>
+            <state_interface name="velocity"/>
+            <state_interface name="effort"/>
+        </joint>
+        
+        <joint name="rear_left_wheel_joint">
+            <command_interface name="position">
+                <param name="min">-${pi/2}</param>
+                <param name="max">${pi/2}</param>
+            </command_interface>
+            <state_interface name="position"/>
+            <state_interface name="velocity"/>
+            <state_interface name="effort"/>
+        </joint>
+        
+        <joint name="rear_right_wheel_joint">
+            <command_interface name="position">
+                <param name="min">-${pi/2}</param>
+                <param name="max">${pi/2}</param>
+            </command_interface>
+            <state_interface name="position"/>
+            <state_interface name="velocity"/>
+            <state_interface name="effort"/>
+        </joint>
+        
+        <joint name="mast_section_1_joint">
+            <command_interface name="position">
+                <param name="min">-${pi/2}</param>
+                <param name="max">${pi/2}</param>
+            </command_interface>
+            <state_interface name="position"/>
+            <state_interface name="velocity"/>
+            <state_interface name="effort"/>
+        </joint>
+        
+        <joint name="mast_section_2_joint">
+            <command_interface name="position">
+                <param name="min">-${pi/2}</param>
+                <param name="max">${pi/2}</param>
+            </command_interface>
+            <state_interface name="position"/>
+            <state_interface name="velocity"/>
+            <state_interface name="effort"/>
+        </joint>
+        
+        <joint name="mast_section_3_joint">
+            <command_interface name="position">
+                <param name="min">-${pi/2}</param>
+                <param name="max">${pi/2}</param>
+            </command_interface>
+            <state_interface name="position"/>
+            <state_interface name="velocity"/>
+            <state_interface name="effort"/>
+        </joint>
+        
+        <joint name="backboard_tilt_joint">
+            <command_interface name="position">
+                <param name="min">-${pi/2}</param>
+                <param name="max">${pi/2}</param>
+            </command_interface>
+            <state_interface name="position"/>
+            <state_interface name="velocity"/>
+            <state_interface name="effort"/>
+        </joint>
+
+    </ros2_control>
+</robot>
