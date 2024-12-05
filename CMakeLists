@@ -1,0 +1,28 @@
+cmake_minimum_required(VERSION 3.5)
+project(my_forklift_robot)
+
+# Avhengigheter
+find_package(ament_cmake REQUIRED)
+find_package(xacro REQUIRED)
+find_package(rclpy REQUIRED)
+find_package(gazebo_ros REQUIRED)
+find_package(controller_manager REQUIRED)
+find_package(joint_state_broadcaster REQUIRED)
+find_package(robot_state_publisher REQUIRED)
+
+# Installer Xacro-filer og URDF-filer
+install(DIRECTORY urdf/
+  DESTINATION share/${PROJECT_NAME}/urdf
+)
+
+# Installer konfigurasjonsfiler
+install(DIRECTORY config/
+  DESTINATION share/${PROJECT_NAME}/config
+)
+
+install(DIRECTORY launch/
+  DESTINATION share/${PROJECT_NAME}/launch
+)
+
+# Gjør pakken kjørbar av ROS2
+ament_package()
