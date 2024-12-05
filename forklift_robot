@@ -1,0 +1,393 @@
+<?xml version="1.0" ?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="robot_modell">
+
+<xacro:include filename="$(find my_forklift_robot)/urdf/robot_control.gazebo.xacro" />
+
+    <gazebo>
+        <static>false</static>
+    </gazebo>
+
+    <!-- Definer variabler -->
+    <xacro:property name="base_length" value="2.0"/>
+    <xacro:property name="base_width" value="1.0"/>
+    <xacro:property name="base_height" value="0.3"/>
+    <xacro:property name="wheel_radius" value="0.2"/>
+    <xacro:property name="wheel_width" value="0.2"/>
+    <xacro:property name="fork_length" value="1.0"/>
+    <xacro:property name="fork_width" value="0.1"/>
+    <xacro:property name="fork_thickness" value="0.05"/>
+    <xacro:property name="mast_section_1_height" value="0.2"/>
+    <xacro:property name="mast_section_2_height" value="1.6"/>
+    <xacro:property name="mast_section_3_height" value="1.6"/>
+    <xacro:property name="mast_width" value="0.1"/>
+    <xacro:property name="backboard_width" value="1.0"/>
+    <xacro:property name="backboard_height" value="0.8"/>
+    <xacro:property name="backboard_thickness" value="0.05"/>
+
+    <link name="base_footprint"/>
+
+    <joint name="base_joint" type="fixed">
+        <parent link="base_footprint"/>
+        <child link="base_link" />
+        <origin xyz="0 0 0.35" rpy="0 0 0"/>
+    </joint>
+
+    <!-- Base link -->
+    <link name="base_link">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+                <box size="${base_length} ${base_width} ${base_height}"/>
+            </geometry>
+            <material name="grey">
+                <color rgba="0.5 0.5 0.5 1.0"/>
+            </material>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+                <box size="${base_length} ${base_width} ${base_height}"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <mass value="2500.0"/>
+            <inertia 
+                ixx="625.0" ixy="0.0" ixz="0.0" 
+                iyy="833.33" iyz="0.0" 
+                izz="1041.2"/>
+        </inertial>
+    </link>
+
+    <!-- Hjul -->
+    <joint type="continuous" name="front_left_wheel_joint">
+        <origin xyz="${base_length/2-wheel_radius} ${base_width/2+wheel_width/2} -${base_height/2}" rpy="-${pi/2} 0 0"/>
+        <child link="front_left_wheel_link"/>
+        <parent link="base_link"/>
+        <axis xyz="0 0 1"/>
+        <limit effort="1000" velocity="1000"/>
+        <dynamics damping="0.7" friction="1.0"/>
+    </joint>
+
+    <link name="front_left_wheel_link">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+                <cylinder length="${wheel_width}" radius="${wheel_radius}" />
+            </geometry>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+                <cylinder length="${wheel_width}" radius="${wheel_radius}" />
+            </geometry>
+        </collision>
+        <inertial>
+            <mass value="50.0"/>
+            <inertia 
+                ixx="0.42" ixy="0.0" ixz="0.0" 
+                iyy="0.42" iyz="0.0" 
+                izz="4.17"/>
+        </inertial>
+    </link>
+    
+    <!-- FRONT RIGHT WHEEL -->
+    <joint type="continuous" name="front_right_wheel_joint">
+        <origin xyz="${base_length/2-wheel_radius} -${base_width/2+wheel_width/2} -${base_height/2}" rpy="-${pi/2} 0 0"/>
+        <child link="front_right_wheel_link"/>
+        <parent link="base_link"/>
+        <axis xyz="0 0 1"/>
+        <limit effort="1000" velocity="1000"/>
+        <dynamics damping="0.7" friction="1.0"/>
+    </joint>
+
+    <link name="front_right_wheel_link">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+                <cylinder length="${wheel_width}" radius="${wheel_radius}" />
+            </geometry>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+                <cylinder length="${wheel_width}" radius="${wheel_radius}" />
+            </geometry>
+        </collision>
+        <inertial>
+            <mass value="50.0"/>
+            <inertia 
+                ixx="0.42" ixy="0.0" ixz="0.0" 
+                iyy="0.42" iyz="0.0" 
+                izz="4.17"/>
+        </inertial>
+    </link>
+
+        <!-- REAR LEFT WHEEL -->
+    <joint type="continuous" name="rear_left_wheel_joint">
+        <origin xyz="${-base_length/2+wheel_radius} ${base_width/2+wheel_width/2} -${base_height/2}" rpy="-${pi/2} 0 0"/>
+        <child link="rear_left_wheel_link"/>
+        <parent link="base_link"/>
+        <axis xyz="0 0 1"/>
+        <limit effort="1000" velocity="1000"/>
+        <dynamics damping="0.7" friction="1.0"/>
+    </joint>
+
+    <link name="rear_left_wheel_link">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+                <cylinder length="${wheel_width}" radius="${wheel_radius}" />
+            </geometry>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+                <cylinder length="${wheel_width}" radius="${wheel_radius}" />
+            </geometry>
+        </collision>
+        <inertial>
+            <mass value="50.0"/>
+            <inertia 
+                ixx="0.42" ixy="0.0" ixz="0.0" 
+                iyy="0.42" iyz="0.0" 
+                izz="4.17"/>
+        </inertial>
+    </link>
+    
+    <!-- REAR RIGHT WHEEL -->
+    <joint type="continuous" name="rear_right_wheel_joint">
+        <origin xyz="${-base_length/2+wheel_radius} ${-base_width/2-wheel_width/2} -${base_height/2}" rpy="-${pi/2} 0 0"/>
+        <child link="rear_right_wheel_link"/>
+        <parent link="base_link"/>
+        <axis xyz="0 0 1"/>
+        <limit effort="1000" velocity="1000"/>
+        <dynamics damping="0.7" friction="1.0"/>
+    </joint>
+
+    <link name="rear_right_wheel_link">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+                <cylinder length="${wheel_width}" radius="${wheel_radius}" />
+            </geometry>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+                <cylinder length="${wheel_width}" radius="${wheel_radius}" />
+            </geometry>
+        </collision>
+        <inertial>
+            <mass value="50.0"/>
+            <inertia 
+                ixx="0.42" ixy="0.0" ixz="0.0" 
+                iyy="0.42" iyz="0.0" 
+                izz="4.17"/>
+        </inertial>
+    </link>
+    
+    <!-- Mastseksjon 1 -->
+    <joint name="mast_section_1_joint" type="revolute">
+        <parent link="base_link"/>
+        <child link="mast_section_1"/>
+        <origin xyz="0 0 ${base_height/2 + mast_section_1_height/2}" rpy="0 0 0"/>
+        <axis xyz="0 0 1"/>
+        <limit lower="-${pi/1}" upper="${pi/1}" effort="1000.0" velocity="100.0"/>
+        <dynamics damping="0.5" friction="0.3"/>
+    </joint>
+
+    <link name="mast_section_1">
+        <visual>
+            <geometry>
+                <box size="${mast_width} ${mast_width} ${mast_section_1_height}"/>
+            </geometry>
+            <material name="blue">
+                <color rgba="0.0 0.0 1.0 1.0"/>
+            </material>
+        </visual>
+        <collision>
+            <geometry>
+                <box size="${mast_width} ${mast_width} ${mast_section_1_height}"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <mass value="333.33"/>
+            <inertia 
+                ixx="10.0" ixy="0.0" ixz="0.0" 
+                iyy="10.0" iyz="0.0" 
+                izz="18.0"/>
+        </inertial>
+    </link>
+    
+    <!-- Mastseksjon 2 -->
+    <joint name="mast_section_2_joint" type="revolute">
+        <parent link="mast_section_1"/>
+        <child link="mast_section_2"/>
+        <origin xyz="0 0 ${mast_section_1_height/2}" rpy="0 0 0"/>
+        <axis xyz="0 1 0"/>
+        <limit lower="-${pi/2}" upper="${pi/2}" effort="1000.0" velocity="50.0"/>
+        <dynamics damping="10.0" friction="1.0"/>
+    </joint>
+
+    <link name="mast_section_2">
+    <visual>
+        <origin xyz="0 0 ${mast_section_2_height/2}" rpy="0 0 0"/>
+        <geometry>
+            <box size="${mast_width} ${mast_width} ${mast_section_2_height}"/>
+        </geometry>
+        <material name="blue">
+            <color rgba="0.0 0.0 1.0 1.0"/>
+        </material>
+    </visual>
+    <collision>
+        <origin xyz="0 0 ${mast_section_2_height/2}" rpy="0 0 0"/>
+        <geometry>
+            <box size="${mast_width} ${mast_width} ${mast_section_2_height}"/>
+        </geometry>
+    </collision>
+    <inertial>
+        <origin xyz="0 0 ${mast_section_2_height/2}" rpy="0 0 0"/>
+        <mass value="0.001"/>
+        <inertia 
+            ixx="20.0" ixy="0.0" ixz="0.0" 
+            iyy="20.0" iyz="0.0" 
+            izz="40.0"/>
+    </inertial>
+</link>
+
+    
+    <!-- Mastseksjon 3 -->
+    <joint name="mast_section_3_joint" type="revolute">
+        <parent link="mast_section_2"/>
+        <child link="mast_section_3"/>
+        <origin xyz="0 0 ${mast_section_2_height}" rpy="0 0 0"/>
+        <axis xyz="0 1 0"/>
+        <limit lower="-${pi/2}" upper="${pi/2}" effort="1000.0" velocity="50.0"/>
+        <dynamics damping="10.0" friction="1.0"/>
+    </joint>
+
+
+    <link name="mast_section_3">
+    <visual>
+        <origin xyz="0 0 ${mast_section_3_height/2}" rpy="0 0 0"/>
+        <geometry>
+            <box size="${mast_width} ${mast_width} ${mast_section_3_height}"/>
+        </geometry>
+        <material name="blue">
+            <color rgba="0.0 0.0 1.0 1.0"/>
+        </material>
+    </visual>
+    <collision>
+        <origin xyz="0 0 ${mast_section_3_height/2}" rpy="0 0 0"/>
+        <geometry>
+            <box size="${mast_width} ${mast_width} ${mast_section_3_height}"/>
+        </geometry>
+    </collision>
+    <inertial>
+        <origin xyz="0 0 ${mast_section_3_height/2}" rpy="0 0 0"/>
+        <mass value="0.001"/>
+        <inertia 
+            ixx="30.0" ixy="0.0" ixz="0.0" 
+            iyy="30.0" iyz="0.0" 
+            izz="60.0"/>
+    </inertial>
+</link>
+
+
+    <!-- Backboard -->
+    <joint name="backboard_tilt_joint" type="revolute">
+        <parent link="mast_section_3"/>
+        <child link="backboard"/>
+        <origin xyz="0 0 ${mast_section_3_height}" rpy="0 0 0"/>
+        <axis xyz="0 1 0"/>
+        <limit lower="-${pi/2}" upper="${pi/2}" effort="500.0" velocity="30.0"/>
+        <dynamics damping="10.0" friction="1.0"/>
+    </joint>
+
+    <link name="backboard">
+        <visual>
+            <origin xyz="${-backboard_height/2 + mast_width/2} 0 ${backboard_thickness/2}" rpy="0 0 0"/>
+            <geometry>
+                <box size="${backboard_height} ${backboard_width} ${backboard_thickness}"/>
+            </geometry>
+            <material name="grey">
+                <color rgba="0.5 0.5 0.5 1.0"/>
+            </material>
+        </visual>
+        <collision>
+            <origin xyz="${-backboard_height/2 + mast_width/2} 0 ${backboard_thickness/2}" rpy="0 0 0"/>
+            <geometry>
+                <box size="${backboard_height} ${backboard_width} ${backboard_thickness}"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <origin xyz="${-backboard_height/2 + mast_width/2} 0 ${backboard_thickness/2}" rpy="0 0 0"/>
+            <mass value="0.001"/>
+            <inertia 
+                ixx="15.0" ixy="0.0" ixz="0.0" 
+                iyy="15.0" iyz="0.0" 
+                izz="30.0"/>
+        </inertial>
+    </link>
+
+    <!-- Forks -->
+    <joint name="left_fork_joint" type="fixed">
+        <parent link="backboard"/>
+        <child link="left_fork"/>
+        <origin xyz="${mast_width/2 - fork_thickness/2} ${backboard_width/4} ${backboard_thickness}" rpy="0 0 0"/>
+    </joint>
+
+    <link name="left_fork">
+        <visual>
+            <origin xyz="0 0 ${fork_length/2}" rpy="0 0 0"/>
+            <geometry>
+                <box size="${fork_thickness} ${fork_width} ${fork_length}"/>
+            </geometry>
+            <material name="grey"/>
+        </visual>
+        <collision>
+            <origin xyz="0 0 ${fork_length/2}" rpy="0 0 0"/>
+            <geometry>
+                <box size="${fork_thickness} ${fork_width} ${fork_length}"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <origin xyz="0 0 ${fork_length/2}" rpy="0 0 0"/>
+            <mass value="0.001"/>
+            <inertia 
+                ixx="2.0" ixy="0.0" ixz="0.0" 
+                iyy="2.0" iyz="0.0" 
+                izz="0.5"/>
+        </inertial>
+    </link>
+
+    <joint name="right_fork_joint" type="fixed">
+        <parent link="backboard"/>
+        <child link="right_fork"/>
+        <origin xyz="${mast_width/2 - fork_thickness/2} ${-backboard_width/4} ${backboard_thickness}" rpy="0 0 0"/>
+    </joint>
+
+    <link name="right_fork">
+        <visual>
+            <origin xyz="0 0 ${fork_length/2}" rpy="0 0 0"/>
+            <geometry>
+                <box size="${fork_thickness} ${fork_width} ${fork_length}"/>
+            </geometry>
+            <material name="grey"/>
+        </visual>
+        <collision>
+            <origin xyz="0 0 ${fork_length/2}" rpy="0 0 0"/>
+            <geometry>
+                <box size="${fork_thickness} ${fork_width} ${fork_length}"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <origin xyz="0 0 ${fork_length/2}" rpy="0 0 0"/>
+            <mass value="0.001"/>
+            <inertia 
+                ixx="2.0" ixy="0.0" ixz="0.0" 
+                iyy="2.0" iyz="0.0" 
+                izz="0.5"/>
+        </inertial>
+    </link>
+</robot>
