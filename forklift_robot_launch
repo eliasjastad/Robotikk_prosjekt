@@ -1,0 +1,70 @@
+from launch import LaunchDescription
+from launch.actions import IncludeLaunchDescription
+from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch_ros.actions import Node
+from launch.substitutions import Command
+import os
+from ament_index_python.packages import get_package_share_directory
+from launch.actions import ExecuteProcess
+from launch.actions import TimerAction
+
+def generate_launch_description():
+    # Paths
+    package_name = 'my_forklift_robot'
+    package_path = get_package_share_directory(package_name)
+    robot_xacro = os.path.join(package_path, 'urdf', 'forklift_robot.xacro')
+    controller_config = os.path.join(package_path, 'config', 'controller_config.yaml')
+
+    robot_description = Command(['xacro ', robot_xacro])
+
+    node_robot_state_publisher = Node(
+        package='robot_state_publisher',
+        executable='robot_state_publisher',
+        output='screen',
+        parameters=[{'robot_description': robot_description}],
+    )
+
+    start_gazebo = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource([
+            os.path.join(get_package_share_directory('gazebo_ros'), 'launch', 'gazebo.launch.py')
+        ]),
+        launch_arguments={'pause': 'true'}.items()
+    )
+
+    spawn_entity = Node(
+        package='gazebo_ros',
+        executable='spawn_entity.py',
+        arguments=['-topic', '/robot_description', '-entity', 'forklift_robot'],
+        output='screen',
+    )
+
+    joint_state_publisher = Node(
+    package='controller_manager',
+    executable='ros2_control_node',
+    parameters=[{'robot_description': robot_description}, controller_config],
+    output='screen',
+)
+    
+    LOAD_CONTROLLER_TRAJECTORY_CONTROLLER = ExecuteProcess(
+    cmd=['ros2', 'control', 'load_controller', '--set-state', 'start','trajectory_controller'],
+    output='screen'
+)
+
+    LOAD_CONTROLLER_POSITION_CONTROLLER = ExecuteProcess(
+    cmd=['ros2', 'control', 'load_controller', '--set-state', 'start','position_controller'],
+    output='screen'
+)
+    return LaunchDescription([
+        node_robot_state_publisher,
+        start_gazebo,
+        spawn_entity,
+        joint_state_publisher,
+        TimerAction(
+        period=2.0,
+        actions=[LOAD_CONTROLLER_TRAJECTORY_CONTROLLER]
+    ),
+        TimerAction(
+        period=3.0,
+        actions=[LOAD_CONTROLLER_POSITION_CONTROLLER]
+    ),
+    ])
