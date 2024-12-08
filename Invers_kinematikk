@@ -1,0 +1,50 @@
+% Importer Robotics Toolbox
+clear all;
+close all;
+clc;
+
+% --- Opprettelse av 4DOF Robot Modell ---
+
+% DH-parametere: [theta d a alpha] i 'standard' konvensjon
+L(1) = Link([0, 0.2, 0, pi/2], 'standard'); % Ledd 1: rotasjon rundt z, forskyvning langs z
+L(2) = Link([0, 0, 1.6, 0], 'standard');    % Ledd 2: rotasjon rundt y, forskyvning langs x
+L(3) = Link([0, 0, 1.6, 0], 'standard');    % Ledd 3: rotasjon rundt y, forskyvning langs x
+L(4) = Link([0, 0, 1, 0], 'standard');      % Ledd 4: rotasjon rundt y, ingen forskyvning
+
+% Opprett robotmodellen
+robot = SerialLink(L, 'name', '4DOF Robot');
+
+% Sett leddgrenser (tilpass etter behov for å unngå uønskede bevegelser)
+robot.qlim = [[-pi pi]; [-pi/2 pi/2]; [-pi/2 pi/2]; [-pi/2 pi/2]];
+
+% --- Initial Visualisering ---
+figure;
+robot.plot([0 0 0 0], 'workspace', [-4 4 -4 4 -4 4]); % Plot robot i nullposisjon
+title('4DOF Robot i Nullposisjon');
+hold on;
+
+% Ønsket posisjon: (x, y, z)
+x = 2; % Juster etter behov
+y = 2; % Juster etter behov
+z = 1; % Juster etter behov
+position = transl(x, y, z);
+
+% Ønsket orientering: Parallell med xy-planet
+% Beregn rotasjonsvinkelen basert på ønsket orientering
+angle_z = atan2(y, x); % Vinkel for å rotere rundt z-aksen slik at endeeffektor peker riktig
+
+% Lag orientering ved hjelp av beregnet vinkel
+orientation = trotz(angle_z);
+
+% Kombiner posisjon og orientering til en full transformasjonsmatrise
+desired_position_and_orientation = position * orientation;
+
+% --- Inverse Kinematikk ---
+
+% Startposisjon for inverse kinematikk beregning
+q0 = [0, 0, 0, 0]; % Startposisjon
+
+% Beregn leddvinklene for å oppnå ønsket posisjon og orientering
+q_solution = robot.ikine(desired_position_and_orientation, q0, 'mask', [1 1 1 0 0 1]);
+
+robot.plot(q_solution);
