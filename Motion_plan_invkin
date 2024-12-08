@@ -1,0 +1,74 @@
+clear all;
+close all;
+clc;
+
+% DH-parametere: [theta d a alpha] i 'standard' konvensjon
+L(1) = Link([0, 0.2, 0, pi/2], 'standard'); % Ledd 1: rotasjon rundt z, forskyvning langs z
+L(2) = Link([0, 0, 1.6, 0], 'standard');    % Ledd 2: rotasjon rundt y, forskyvning langs x
+L(3) = Link([0, 0, 1.6, 0], 'standard');    % Ledd 3: rotasjon rundt y, forskyvning langs x
+L(4) = Link([0, 0, 1, 0], 'standard');      % Ledd 4: rotasjon rundt y, ingen forskyvning
+
+% Opprett robotmodellen
+robot = SerialLink(L, 'name', '4DOF Robot');
+
+% Sett leddgrenser (tilpass etter behov for å unngå uønskede bevegelser)
+robot.qlim = [[-pi pi]; [-pi/2 pi/2]; [-pi/2 pi/2]; [-pi/2 pi/2]];
+
+% Ønsket posisjon: (x, y, z)
+x = 2; % Juster etter behov
+y = 2; % Juster etter behov
+z = 1; % Juster etter behov
+position = transl(x, y, z);
+
+% Ønsket orientering: Parallell med xy-planet
+angle_z = atan2(y, x); % Vinkel for å rotere rundt z-aksen slik at endeeffektor peker riktig
+
+% Lag orientering ved hjelp av beregnet vinkel
+orientation = trotz(angle_z);
+
+% Kombiner posisjon og orientering til en full transformasjonsmatrise
+desired_position_and_orientation = position * orientation;
+
+% Startposisjon for inverse kinematikk beregning
+q0 = [0, 0, 0, 0];
+
+% Beregn leddvinklene for å oppnå ønsket posisjon og orientering
+q_solution = robot.ikine(desired_position_and_orientation, q0, 'mask', [1 1 1 0 0 1]);
+
+qj = jtraj(q0, q_solution, 10);
+
+waypoints = qj;
+
+% --- Punkt 2: Beveg seg ut fra basen med samme z-verdi ---
+% Regn ut ny posisjon for punkt 2
+distance_from_base = 0.5; % Juster lengden etter behov
+angle_base_to_ee = atan2(y, x);
+x2 = x + distance_from_base * cos(angle_base_to_ee);
+y2 = y + distance_from_base * sin(angle_base_to_ee);
+
+% Bruk transl til å definere posisjon og orientation basert på trigonometrisk beregning
+position_2 = transl(x2, y2, z) * orientation;
+q2 = robot.ikine(position_2, q_solution, 'mask', [1 1 1 0 0 1]);
+waypoints = [waypoints; jtraj(q_solution, q2, 10)];
+
+% --- Punkt 3: Bevegelse opp langs z-aksen med 0.2 enheter ---
+z3 = z + 0.2; % Ny høyde i z
+position_3 = transl(x2, y2, z3) * orientation;
+q3 = robot.ikine(position_3, q2, 'mask', [1 1 1 0 0 1]);
+waypoints = [waypoints; jtraj(q2, q3, 10)];
+
+% --- Punkt 4: Bevegelse i motsatt retning av punkt 2 ---
+% Bruk samme avstand men i motsatt retning
+x4 = x - distance_from_base * cos(angle_base_to_ee);
+y4 = y - distance_from_base * sin(angle_base_to_ee);
+position_4 = transl(x4, y4, z3) * orientation; % Samme z-verdi som punkt 3
+q4 = robot.ikine(position_4, q3, 'mask', [1 1 1 0 0 1]);
+waypoints = [waypoints; jtraj(q3, q4, 10)];
+
+% --- Punkt 5: Tilbake til startposisjon ---
+waypoints = [waypoints; jtraj(q4, q0, 10)];
+
+% --- Visualisering av bevegelse ---
+figure;
+robot.plot(waypoints);
+title('4DOF Robot med Waypoints i Cartesian Space');
