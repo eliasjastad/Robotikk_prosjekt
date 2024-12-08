@@ -1,0 +1,108 @@
+% Symbolsk definisjon
+syms theta1 theta2 theta3 theta4 d1 a2 a3 a4
+
+% Transformasjon for Ledd 1
+T1_0 = [cos(theta1), -sin(theta1), 0, 0;
+        sin(theta1),  cos(theta1), 0, 0;
+        0,            0,           1, d1;
+        0,            0,           0, 1] * ...
+       [1, 0, 0, 0;
+        0, cos(pi/2), -sin(pi/2), 0;
+        0, sin(pi/2), cos(pi/2), 0;
+        0, 0, 0, 1];
+
+% Transformasjon for Ledd 2
+T2_1 = [cos(theta2), -sin(theta2), 0, a2*cos(theta2);
+        sin(theta2),  cos(theta2), 0, a2*sin(theta2);
+        0,            0,           1, 0;
+        0,            0,           0, 1];
+
+% Transformasjon for Ledd 3
+T3_2 = [cos(theta3), -sin(theta3), 0, a3*cos(theta3);
+        sin(theta3),  cos(theta3), 0, a3*sin(theta3);
+        0,            0,           1, 0;
+        0,            0,           0, 1];
+
+% Transformasjon for Ledd 4
+T4_3 = [cos(theta4), -sin(theta4), 0, a4*cos(theta4);
+        sin(theta4),  cos(theta4), 0, a4*sin(theta4);
+        0,            0,           1, 0;
+        0,            0,           0, 1];
+
+
+% --- Legg til Numerisk Beregning ---
+
+% Definer numeriske verdier for test
+theta1_val = 0; % 45 grader
+theta2_val = pi/4; % 30 grader
+theta3_val = -pi/4; % 60 grader
+theta4_val = pi/4; % 45 grader
+d1_val = 0.2; % Høyde for Ledd 1
+a2_val = 1.6; % Lengde på Ledd 2
+a3_val = 0.7; % Lengde på Ledd 3
+a4_val = 1; % Lengde på Ledd 4
+
+% Sett inn numeriske verdier for alle matrisene
+T1_0_num = double(subs(T1_0, {theta1, d1}, {theta1_val, d1_val}));
+T2_1_num = double(subs(T2_1, {theta2, a2}, {theta2_val, a2_val}));
+T3_2_num = double(subs(T3_2, {theta3, a3}, {theta3_val, a3_val}));
+T4_3_num = double(subs(T4_3, {theta4, a4}, {theta4_val, a4_val}));
+
+% Totale numeriske transformasjonsmatrise
+T_base_to_end_effector_num = T1_0_num * T2_1_num * T3_2_num * T4_3_num;
+
+% --- Visualisering av Rotasjoner og Posisjoner ---
+
+% Opprett et figurvindu for å vise robotens bevegelser
+figure;
+trplot(eye(4), 'frame', '0', 'rgb', 'arrow', 'length', 0.5); hold on;
+trplot(T1_0_num, 'frame', '1', 'rgb', 'arrow', 'length', 0.5);
+trplot(T1_0_num * T2_1_num, 'frame', '2', 'rgb', 'arrow', 'length', 0.5);
+trplot(T1_0_num * T2_1_num * T3_2_num, 'frame', '3', 'rgb', 'arrow', 'length', 0.5);
+trplot(T_base_to_end_effector_num, 'frame', '4', 'rgb', 'arrow', 'length', 0.5);
+
+% Tittel og akselikhet>
+title('Robot Transformasjoner');
+axis equal;
+
+% Øk griden på figuren
+grid on;
+
+% Juster aksene for å få en bedre visning
+
+xlim([-1 5]);
+zlim([-1 4]);
+
+% Aktiver grid
+grid on;
+
+view([0.0 0.0])
+
+% --- Ny figur: Visning ovenfra (xy-planet) ---
+
+% Oppdaterer variabler for å unngå forvirring av akser
+theta1_val = pi/4; % 45 grader
+
+% Oppdaterer matrisene
+T1_0_num = double(subs(T1_0, {theta1, d1}, {theta1_val, d1_val}));
+T2_1_num = double(subs(T2_1, {theta2, a2}, {theta2_val, a2_val}));
+T3_2_num = double(subs(T3_2, {theta3, a3}, {theta3_val, a3_val}));
+T4_3_num = double(subs(T4_3, {theta4, a4}, {theta4_val, a4_val}));
+
+% Totale numeriske transformasjonsmatrise
+T_base_to_end_effector_num = T1_0_num * T2_1_num * T3_2_num * T4_3_num;
+
+% Opprett en ny figur
+figure;
+trplot(eye(4), 'frame', '0', 'rgb', 'arrow', 'length', 0.5); hold on;
+trplot(T1_0_num, 'frame', '1', 'rgb', 'arrow', 'length', 0.5);
+trplot(T1_0_num * T2_1_num, 'frame', '2', 'rgb', 'arrow', 'length', 0.5);
+trplot(T1_0_num * T2_1_num * T3_2_num, 'frame', '3', 'rgb', 'arrow', 'length', 0.5);
+trplot(T_base_to_end_effector_num, 'frame', '4', 'rgb', 'arrow', 'length', 0.5);
+
+% Sett visning til ovenfra
+view(3);
+axis equal;
+grid on;
+xlim([-1 3]);
+ylim([-1 2.5]);
