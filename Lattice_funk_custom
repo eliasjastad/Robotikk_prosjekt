@@ -1,0 +1,78 @@
+function path = latticePlanner(startPose, goalPose, map)
+    % Initialize parameters
+    gridSize = size(map); % Size of the grid
+    stepSize = 1; % Step size for each movement
+    orientations = [0, pi/2, pi, -pi/2]; % Four possible directions (up, right, down, left)
+    
+    % Cost maps (initialize with infinity)
+    costMap = inf(gridSize);
+    costMap(startPose(1), startPose(2)) = 0;
+    
+    % Parent map to reconstruct the path
+    parentMap = cell(gridSize);
+    
+    % Priority queue (open list) with [x, y, cost + heuristic]
+    openList = [startPose, 0];
+    closedList = zeros(gridSize);
+    
+    % Main loop for A* algorithm
+    while ~isempty(openList)
+        % Pop the node with the lowest cost
+        [~, idx] = min(openList(:, 3));
+        currentNode = openList(idx, :);
+        openList(idx, :) = [];
+        
+        x = currentNode(1);
+        y = currentNode(2);
+        
+        % Mark the current node as closed
+        closedList(x, y) = 1;
+        
+        % Check if we reached the goal
+        if x == goalPose(1) && y == goalPose(2)
+            path = reconstructPath(goalPose, parentMap, startPose);
+            return;
+        end
+        
+        % Expand neighbors
+        for angle = orientations
+            newX = x + round(stepSize * cos(angle));
+            newY = y + round(stepSize * sin(angle));
+            
+            % Check boundaries and if the node is already closed
+            if newX < 1 || newX > gridSize(1) || newY < 1 || newY > gridSize(2) || closedList(newX, newY)
+                continue;
+            end
+            
+            % Check for obstacles
+            if map(newX, newY) == 1
+                continue;
+            end
+            
+            % Calculate cost and heuristic
+            newCost = costMap(x, y) + stepSize;
+            heuristic = sqrt((goalPose(1) - newX)^2 + (goalPose(2) - newY)^2);
+            totalCost = newCost + heuristic;
+            
+            % If the new cost is lower, update the cost and parent
+            if totalCost < costMap(newX, newY)
+                costMap(newX, newY) = newCost;
+                parentMap{newX, newY} = [x, y];
+                openList = [openList; newX, newY, totalCost]; %#ok<AGROW>
+            end
+        end
+    end
+    
+    % If no path is found
+    path = [];
+end
+
+function path = reconstructPath(goalPose, parentMap, startPose)
+    path = goalPose;
+    current = goalPose;
+    
+    while ~isequal(current, startPose)
+        current = parentMap{current(1), current(2)};
+        path = [current; path]; %#ok<AGROW>
+    end
+end
