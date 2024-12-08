@@ -1,0 +1,98 @@
+% Samlet script: Lattice Planner med pure pursuit
+clear all; % Tøm alle variabler i arbeidsområdet
+close all; % Lukk alle åpne figurer
+clc; % Tøm kommandovinduet
+
+% Definer start- og målposisjon i kartet
+startPose = [5, 5]; % Startposisjon [y, x]
+goalPose = [15, 15]; % Målposisjon [y, x]
+
+% Opprett kart med hindringer (20x20 grid)
+map = zeros(20, 20); % Eksempelkart uten hindringer
+map(6:10, 8) = 1; % Vertikal hindring
+map(10, 4:10) = 1; % Horisontal hindring
+map(13:18, 14) = 1; % Stor vertikal hindring
+map(3:5, 16:18) = 1; % Horisontal hindring nær start
+map(15:17, 2:5) = 1; % Hindring nær mål
+
+% Kall lattice planner-funksjonen
+path = latticePlanner(startPose, goalPose, map);
+
+% Visualiser kartet og den planlagte banen
+figure;
+hold on;
+% Tegn kartet med hindringer
+for x = 1:size(map, 1)
+    for y = 1:size(map, 2)
+        if map(x, y) == 1
+            plot(y, x, 'ks', 'MarkerFaceColor', 'k'); % Tegn hindringer som svarte firkanter
+        end
+    end
+end
+
+% Tegn start- og målposisjon
+plot(startPose(2), startPose(1), 'go', 'MarkerSize', 10, 'MarkerFaceColor', 'g'); % Startposisjon (grønn sirkel)
+plot(goalPose(2), goalPose(1), 'ro', 'MarkerSize', 10, 'MarkerFaceColor', 'r'); % Målposisjon (rød sirkel)
+
+% Tegn den planlagte banen (bytt om x og y for riktig plotting)
+if ~isempty(path)
+    plot(path(:, 2), path(:, 1), 'b-', 'LineWidth', 2); % Tegn banen som en blå linje
+end
+
+% Juster akser og visning
+axis([1 size(map, 2) 1 size(map, 1)]);
+axis equal;
+set(gca, 'YDir', 'normal'); % Snu y-aksen slik at y-verdiene øker oppover
+xlabel('X-koordinat');
+ylabel('Y-koordinat');
+title('Kart med Hindringer og Planlagt Bane');
+hold off;
+
+% Konverter den planlagte banen til waypoints for roboten (sørg for at [x, y] formatet er riktig)
+waypoints = [path(:, 2), path(:, 1)];
+
+% Plot banen for oppfølging
+figure;
+plot(waypoints(:,1), waypoints(:,2), 'k--o');
+xlabel('X (m)');
+ylabel('Y (m)');
+title('Banen som skal følges');
+grid on;
+hold on;
+
+% Initialiser robotens posisjon og orientering
+robotInitialLocation = waypoints(1, :);
+robotInitialOrientation = 0; % Startorientering i radianer
+
+% Lag en kinematisk differensialdrevet modell av roboten
+robot = differentialDriveKinematics("TrackWidth", 0.5, "VehicleInputs", "VehicleSpeedHeadingRate");
+
+% Konfigurer Pure Pursuit Controller
+controller = controllerPurePursuit;
+controller.Waypoints = waypoints;
+controller.DesiredLinearVelocity = 0.6; % Lineær hastighet (m/s)
+controller.MaxAngularVelocity = 1; % Maksimal rotasjonshastighet (rad/s)
+controller.LookaheadDistance = 1.8; % Se-forover-avstand (m)
+
+% Simuleringsparametere
+sampleTime = 0.05; % Tidssteg (s)
+currentPose = [robotInitialLocation, robotInitialOrientation]'; % Nåværende posisjon og orientering
+goalRadius = 0.1; % Toleranse for å nå målet (m)
+distanceToGoal = norm(robotInitialLocation - waypoints(end, :));
+
+% Simuler roboten til den når målet
+while distanceToGoal > goalRadius
+    % Beregn kontrollsignalene (lineær og vinkelhastighet)
+    [v, omega] = controller(currentPose);
+
+    % Oppdater robotens posisjon ved hjelp av kinematikken
+    vel = derivative(robot, currentPose, [v omega]);
+    currentPose = currentPose + vel * sampleTime; % Oppdater posisjonen
+
+    % Beregn ny avstand til målet
+    distanceToGoal = norm(currentPose(1:2)' - waypoints(end, :));
+
+    % Plott robotens bane
+    plot(currentPose(1), currentPose(2), 'b.'); % Plott nåværende posisjon
+    pause(0.05); % Pause for animasjon
+end
